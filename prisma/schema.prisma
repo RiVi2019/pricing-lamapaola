@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Cliente {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Destinazione {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  trasporto Float
+}
+
+model Imballo {
+  id       Int    @id @default(autoincrement())
+  famiglia String
+  codice   String
+  nome     String
+  costo    Float
+}
+
+model Pallet {
+  id     Int    @id @default(autoincrement())
+  codice String @unique
+  costo  Float
+}
+
+model Quotazione {
+  id           Int      @id @default(autoincrement())
+  cliente      String
+  prodotto     String
+  lotto        String
+  destinazione String
+  prezzo       Float
+  costo        Float
+  utile        Float
+  data         DateTime @default(now())
+}
