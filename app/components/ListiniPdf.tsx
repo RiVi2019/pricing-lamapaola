@@ -62,9 +62,13 @@ export default function ListiniPdf(): React.JSX.Element {
   const [clienti, setClienti] = React.useState<ClienteAnagraficaStored[]>([]);
   const [clienteSelezionato, setClienteSelezionato] = React.useState("");
   const [validita, setValidita] = React.useState("");
-  const [note, setNote] = React.useState("");
+  const [note, setNote] = React.useState(
+    "Prezzi validi salvo variazioni di mercato e disponibilità merce."
+  );
   const [ricerca, setRicerca] = React.useState("");
-  const [righeSelezionate, setRigheSelezionate] = React.useState<RigaListinoSelezionata[]>([]);
+  const [righeSelezionate, setRigheSelezionate] = React.useState<
+    RigaListinoSelezionata[]
+  >([]);
 
   React.useEffect(() => {
     const storedQuotes = localStorage.getItem(STORAGE_KEY_QUOTES);
@@ -175,7 +179,10 @@ export default function ListiniPdf(): React.JSX.Element {
           </div>
 
           <div className="relative mb-4">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
             <input
               value={ricerca}
               onChange={(e) => setRicerca(e.target.value)}
@@ -242,64 +249,49 @@ export default function ListiniPdf(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="rounded-[32px] border border-sky-100 bg-white p-8 shadow-[0_18px_45px_rgba(15,23,42,0.08)] print:rounded-none print:border-none print:shadow-none">
-        <div className="mb-8 flex items-start justify-between gap-6">
-          <div className="max-w-[260px]">
-            <img
-              src={logoLamapaola}
-              alt="Lamapaola"
-              className="h-auto w-full object-contain"
-            />
-          </div>
+      <div className="rounded-[32px] border border-sky-100 bg-white p-8 shadow-[0_18px_45px_rgba(15,23,42,0.08)] print:rounded-none print:border-none print:p-0 print:shadow-none">
+        <div className="border-b border-slate-200 pb-6">
+          <div className="flex items-start justify-between gap-6">
+            <div className="max-w-[260px]">
+              <img
+                src={logoLamapaola}
+                alt="Lamapaola"
+                className="h-auto w-full object-contain"
+              />
+            </div>
 
-          <div className="text-right text-sm text-slate-700">
-            <div className="text-right text-sm text-slate-700 leading-6">
-  <div className="text-lg font-bold text-slate-900">
-    ORTOFRUTTICOLA LAMAPAOLA SRL
-  </div>
+            <div className="text-right text-sm leading-6 text-slate-700">
+              <div className="text-lg font-bold text-slate-900">
+                ORTOFRUTTICOLA LAMAPAOLA SRL
+              </div>
+              <div>S.P. ANDRIA - TRANI KM 2,800</div>
+              <div>76123 ANDRIA (BT)</div>
 
-  <div>S.P. ANDRIA - TRANI KM 2,800</div>
-  <div>76123 ANDRIA (BT)</div>
+              <div className="mt-2">P.IVA 08731690726</div>
+              <div>CODICE SDI: 1N74KED</div>
+              <div>PEC: ortofrutticolalamapaolasrl@pec.it</div>
+              <div>www.ortofrutticolalamapaola.it</div>
 
-  <div className="mt-2">
-    P.IVA 08731690726
-  </div>
-
-  <div>
-    CODICE SDI: 1N74KED
-  </div>
-
-  <div>
-    PEC: ortofrutticolalamapaolasrl@pec.it
-  </div>
-
-  <div className="mt-1">
-    www.ortofrutticolalamapaola.it
-  </div>
-
-  <div className="mt-3 text-xs text-slate-500">
-    Listino prezzi clienti
-  </div>
-
-  <div className="text-xs text-slate-500">
-    Data: {new Date().toLocaleDateString("it-IT")}
-  </div>
-</div>
-            <div>Listino prezzi clienti</div>
-            <div className="mt-2">
-              Data:{" "}
-              {new Date().toLocaleDateString("it-IT", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
+              <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                Listino prezzi clienti
+              </div>
+              <div className="text-xs text-slate-500">
+                Data:{" "}
+                {new Date().toLocaleDateString("it-IT", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="my-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Cliente</div>
+            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Cliente
+            </div>
             <div className="mt-2 text-base font-semibold text-slate-900">
               {clienteAttivo?.denominazione || "—"}
             </div>
@@ -312,58 +304,76 @@ export default function ListiniPdf(): React.JSX.Element {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Dettagli offerta</div>
+            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Dettagli offerta
+            </div>
             <div className="mt-2 text-sm text-slate-700">
               <strong>Validità:</strong> {validita || "—"}
             </div>
             <div className="mt-1 text-sm text-slate-700">
               <strong>Destinazione:</strong> {clienteAttivo?.piattaformaScarico || "—"}
             </div>
+            <div className="mt-1 text-sm text-slate-700">
+              <strong>Scontistica cliente:</strong> {clienteAttivo?.scontistica || "0"}%
+            </div>
           </div>
         </div>
 
-        <table className="w-full border-collapse overflow-hidden rounded-2xl text-sm">
-          <thead>
-            <tr className="bg-slate-100 text-left">
-              <th className="border border-slate-200 px-4 py-3">Referenza</th>
-              <th className="border border-slate-200 px-4 py-3">Lotto</th>
-              <th className="border border-slate-200 px-4 py-3">Unità</th>
-              <th className="border border-slate-200 px-4 py-3">Prezzo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selectedQuotes.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="border border-slate-200 px-4 py-6 text-center text-slate-500">
-                  Nessuna referenza selezionata.
-                </td>
+        <div className="overflow-hidden rounded-2xl border border-slate-200">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-100 text-left">
+                <th className="border-b border-slate-200 px-4 py-3">Referenza</th>
+                <th className="border-b border-slate-200 px-4 py-3">Lotto</th>
+                <th className="border-b border-slate-200 px-4 py-3">Unità</th>
+                <th className="border-b border-slate-200 px-4 py-3">Prezzo</th>
               </tr>
-            ) : (
-              selectedQuotes.map((item) => {
-                const prezzo =
-                  item.form.unitaMisura === "pz"
-                    ? item.metrics.prezzoFinaleScontatoPezzo
-                    : item.metrics.prezzoFinaleScontatoKg;
+            </thead>
+            <tbody>
+              {selectedQuotes.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="px-4 py-6 text-center text-slate-500"
+                  >
+                    Nessuna referenza selezionata.
+                  </td>
+                </tr>
+              ) : (
+                selectedQuotes.map((item) => {
+                  const prezzo =
+                    item.form.unitaMisura === "pz"
+                      ? item.metrics.prezzoFinaleScontatoPezzo
+                      : item.metrics.prezzoFinaleScontatoKg;
 
-                return (
-                  <tr key={item.id}>
-                    <td className="border border-slate-200 px-4 py-3">{item.form.nomeProdotto}</td>
-                    <td className="border border-slate-200 px-4 py-3">
-                      {item.form.codiceLotto || "—"}
-                    </td>
-                    <td className="border border-slate-200 px-4 py-3">{item.form.unitaMisura}</td>
-                    <td className="border border-slate-200 px-4 py-3 font-semibold">
-                      {euro(prezzo)}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                  return (
+                    <tr key={item.id} className="odd:bg-white even:bg-slate-50/60">
+                      <td className="border-b border-slate-200 px-4 py-3">
+                        {item.form.nomeProdotto}
+                      </td>
+                      <td className="border-b border-slate-200 px-4 py-3">
+                        {item.form.codiceLotto || "—"}
+                      </td>
+                      <td className="border-b border-slate-200 px-4 py-3">
+                        {item.form.unitaMisura}
+                      </td>
+                      <td className="border-b border-slate-200 px-4 py-3 font-semibold">
+                        {euro(prezzo)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">
           <strong>Note:</strong> {note || "—"}
+        </div>
+
+        <div className="mt-8 text-xs leading-5 text-slate-500">
+          Documento ad uso commerciale. Prezzi soggetti a disponibilità merce e conferma ordine.
         </div>
       </div>
     </div>
