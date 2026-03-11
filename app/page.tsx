@@ -1,10 +1,10 @@
-import PricingApp from "./components/PricingApp";
+import LamapaolaV15AppShell from "./components/LamapaolaV15AppShell";
 import AuthGate from "./components/AuthGate";
 
 export default function Page() {
   return (
     <AuthGate>
-      <PricingApp />
+      <LamapaolaV15AppShell />
     </AuthGate>
   );
 }

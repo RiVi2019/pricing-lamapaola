@@ -134,10 +134,6 @@ export default function AuthGate({
                 Accedi
               </button>
             </form>
-
-            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-xs text-amber-800">
-              Credenziali iniziali: <strong>admin</strong> / <strong>lamapaola123</strong>
-            </div>
           </div>
         </div>
       </div>

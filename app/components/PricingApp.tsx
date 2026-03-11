@@ -1,5 +1,5 @@
 "use client";
-
+import ReseLottoMasterDetail from "./ReseLottoMasterDetail";
 import React from "react";
 import {
   Save,
@@ -163,8 +163,18 @@ interface PricingMasters {
   imballi: Record<PackagingFamily, PackagingItem[]>;
   pallet: PalletItem[];
 }
-
+interface ClienteAnagraficaStored {
+  id: string;
+  denominazione: string;
+  sede: string;
+  piva: string;
+  cf: string;
+  scontistica: string;
+  piattaformaScarico: string;
+  costoTrasporto: string;
+}
 const STORAGE_KEY = "pricing-app-ortofrutta-v12";
+const STORAGE_KEY_CLIENTI_ANAGRAFICA = "lamapaola-anagrafiche-clienti-v1";
 const MASTERS_KEY = "pricing-app-ortofrutta-v12-masters";
 const logoLamapaola = "/logo-lamapaola.jpg";
 const FINOCCHIO_COSTO_RACCOLTA = 800;
@@ -196,28 +206,7 @@ const RESE_STANDARD: Record<ProductName, number> = {
   patate: 100
 };
 
-const CLIENTI_DEFAULT: ClientName[] = [
-  "ALDI ITALIA SRL",
-  "ARCA DISTRIBUZIONE",
-  "CENTRO 3A",
-  "CONAD ADRIATICO",
-  "CONAD CENTRO NORD",
-  "GEMUSERING STUTTGART",
-  "IPER LISCATE",
-  "IPER TRUCCAZZANO",
-  "IPERAL",
-  "ITALBRIX",
-  "NATOORA",
-  "PAM PADOVA",
-  "PAM PONTEDERA",
-  "PAM ROMA",
-  "PAM TREZZANO",
-  "PENNY",
-  "SAN LIDANO",
-  "SOGEGROSS",
-  "SPREAFICO",
-  "TIGROS"
-];
+const CLIENTI: ClientName[] = [];
 
 const SCONTI_CLIENTE: Record<string, number> = {
   "CONAD ADRIATICO": 3.5,
@@ -404,7 +393,7 @@ function sortStrings(values: string[]): string[] {
 
 function getDefaultMasters(): PricingMasters {
   return {
-    clienti: sortStrings(CLIENTI_DEFAULT),
+    clienti: sortStrings(CLIENTI),
     destinazioni: sortStrings(Object.keys(DEFAULT_TRASPORTI)),
     trasporti: { ...DEFAULT_TRASPORTI },
     imballi: JSON.parse(JSON.stringify(DEFAULT_IMBALLI)) as Record<PackagingFamily, PackagingItem[]>,
@@ -661,6 +650,11 @@ export default function PricingApp(): React.JSX.Element {
   const [newImballoCosto, setNewImballoCosto] = React.useState("");
   const [newPalletCode, setNewPalletCode] = React.useState("");
   const [newPalletCosto, setNewPalletCosto] = React.useState("");
+  const [clientiAnagrafica, setClientiAnagrafica] = React.useState<ClienteAnagraficaStored[]>([]);
+  const clientiDisponibili = clientiAnagrafica
+  .map((item) => item.denominazione)
+  .filter(Boolean)
+  .sort((a, b) => a.localeCompare(b, "it"));
 
   React.useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -703,37 +697,47 @@ export default function PricingApp(): React.JSX.Element {
       setForm((prev) => ({ ...prev, costoTrasportoPedana: String(prezzo) }));
     }
   }, [form.destinazione, form.overrideTrasporto, masters.trasporti]);
+  React.useEffect(() => {
+  const stored = localStorage.getItem(STORAGE_KEY_CLIENTI_ANAGRAFICA);
+  if (!stored) {
+    setClientiAnagrafica([]);
+    return;
+  }
+
+  try {
+    setClientiAnagrafica(JSON.parse(stored) as ClienteAnagraficaStored[]);
+  } catch {
+    setClientiAnagrafica([]);
+  }
+}, []);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const updateCliente = (cliente: ClientName): void => {
-    if (!cliente) {
-      setForm((prev) => ({ ...prev, cliente: "", destinazione: "" }));
-      return;
-    }
+   const updateCliente = (cliente: ClientName): void => {
+  if (!cliente) {
+    setForm((prev) => ({
+      ...prev,
+      cliente: "",
+      destinazione: "",
+      costoTrasportoPedana: "",
+      scontoCliente: "",
+    }));
+    return;
+  }
 
-    const famigliaForzata = FAMIGLIA_IMBALLO_CLIENTE[cliente];
-    const destinazioneAutomatica = DESTINAZIONE_CLIENTE[cliente] ?? "";
-    const trasportoAutomatico = destinazioneAutomatica ? String(masters.trasporti[destinazioneAutomatica] ?? "") : "";
+  const clienteAnagrafica = clientiAnagrafica.find(
+    (item) => item.denominazione === cliente
+  );
 
-    if (!famigliaForzata) {
-      setForm((prev) => ({
-        ...prev,
-        cliente,
-        destinazione: destinazioneAutomatica,
-        costoTrasportoPedana:
-          prev.overrideTrasporto && prev.costoTrasportoPedana
-            ? prev.costoTrasportoPedana
-            : trasportoAutomatico || prev.costoTrasportoPedana
-      }));
-      return;
-    }
+  const destinazioneAutomatica = clienteAnagrafica?.piattaformaScarico || "";
+  const trasportoAutomatico = clienteAnagrafica?.costoTrasporto || "";
+  const scontoAutomatico = clienteAnagrafica?.scontistica || "";
 
-    const primoImballo = masters.imballi[famigliaForzata][0];
-    const opzioni = CASSE_PER_PEDANA_DEFAULT[primoImballo.code] ?? ["0"];
+  const famigliaForzata = FAMIGLIA_IMBALLO_CLIENTE[cliente];
 
+  if (!famigliaForzata) {
     setForm((prev) => ({
       ...prev,
       cliente,
@@ -741,12 +745,29 @@ export default function PricingApp(): React.JSX.Element {
       costoTrasportoPedana:
         prev.overrideTrasporto && prev.costoTrasportoPedana
           ? prev.costoTrasportoPedana
-          : trasportoAutomatico || prev.costoTrasportoPedana,
-      famigliaImballo: famigliaForzata,
-      imballoCode: primoImballo.code,
-      cassePerPedana: opzioni[0] ?? "0"
+          : trasportoAutomatico,
+      scontoCliente: scontoAutomatico,
     }));
-  };
+    return;
+  }
+
+  const primoImballo = masters.imballi[famigliaForzata][0];
+  const opzioni = CASSE_PER_PEDANA_DEFAULT[primoImballo.code] ?? ["0"];
+
+  setForm((prev) => ({
+    ...prev,
+    cliente,
+    destinazione: destinazioneAutomatica,
+    costoTrasportoPedana:
+      prev.overrideTrasporto && prev.costoTrasportoPedana
+        ? prev.costoTrasportoPedana
+        : trasportoAutomatico,
+    scontoCliente: scontoAutomatico,
+    famigliaImballo: famigliaForzata,
+    imballoCode: primoImballo.code,
+    cassePerPedana: opzioni[0] ?? "0",
+  }));
+};
 
   const updateProdotto = (prodotto: ProductName): void => {
     setForm((prev) => ({
@@ -1099,13 +1120,12 @@ export default function PricingApp(): React.JSX.Element {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <SurfaceCard className="xl:col-span-2">
             <ClientReferenceBlock
-              form={form}
-              clienti={masters.clienti}
-              update={update}
-              updateCliente={updateCliente}
-              updateProdotto={updateProdotto}
-            />
-
+  form={form}
+  clienti={clientiDisponibili}
+  update={update}
+  updateCliente={updateCliente}
+  updateProdotto={updateProdotto}
+/>
             {form.nomeProdotto === "finocchio" ? (
               <div className="mb-6 rounded-3xl border border-emerald-100 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
                 Per <strong>finocchio</strong> il costo raccolta è fisso: € 800 su 20.000 kg, pari a <strong>{euro(FINOCCHIO_COSTO_RACCOLTA / FINOCCHIO_QTA_RACCOLTA)}</strong> per kg.
