@@ -253,7 +253,38 @@ export default function ListiniPdf(): React.JSX.Element {
           </div>
 
           <div className="text-right text-sm text-slate-700">
-            <div className="text-lg font-bold text-slate-900">LAMAPAOLA SRL</div>
+            <div className="text-right text-sm text-slate-700 leading-6">
+  <div className="text-lg font-bold text-slate-900">
+    ORTOFRUTTICOLA LAMAPAOLA SRL
+  </div>
+
+  <div>S.P. ANDRIA - TRANI KM 2,800</div>
+  <div>76123 ANDRIA (BT)</div>
+
+  <div className="mt-2">
+    P.IVA 08731690726
+  </div>
+
+  <div>
+    CODICE SDI: 1N74KED
+  </div>
+
+  <div>
+    PEC: ortofrutticolalamapaolasrl@pec.it
+  </div>
+
+  <div className="mt-1">
+    www.ortofrutticolalamapaola.it
+  </div>
+
+  <div className="mt-3 text-xs text-slate-500">
+    Listino prezzi clienti
+  </div>
+
+  <div className="text-xs text-slate-500">
+    Data: {new Date().toLocaleDateString("it-IT")}
+  </div>
+</div>
             <div>Listino prezzi clienti</div>
             <div className="mt-2">
               Data:{" "}
