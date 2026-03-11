@@ -65,6 +65,9 @@ export default function ListiniPdf(): React.JSX.Element {
   const [note, setNote] = React.useState(
     "Prezzi validi salvo variazioni di mercato e disponibilità merce."
   );
+  const [firmaCommerciale, setFirmaCommerciale] = React.useState("Ufficio Commerciale Lamapaola");
+  const [emailCommerciale, setEmailCommerciale] = React.useState("ortofrutticolalamapaolasrl@pec.it");
+  const [telefonoCommerciale, setTelefonoCommerciale] = React.useState("");
   const [ricerca, setRicerca] = React.useState("");
   const [righeSelezionate, setRigheSelezionate] = React.useState<
     RigaListinoSelezionata[]
@@ -142,6 +145,28 @@ export default function ListiniPdf(): React.JSX.Element {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mt-4">
+  <input
+    value={firmaCommerciale}
+    onChange={(e) => setFirmaCommerciale(e.target.value)}
+    className={inputClass}
+    placeholder="Firma commerciale"
+  />
+
+  <input
+    value={emailCommerciale}
+    onChange={(e) => setEmailCommerciale(e.target.value)}
+    className={inputClass}
+    placeholder="Email commerciale"
+  />
+
+  <input
+    value={telefonoCommerciale}
+    onChange={(e) => setTelefonoCommerciale(e.target.value)}
+    className={inputClass}
+    placeholder="Telefono commerciale"
+  />
+</div>
           <select
             value={clienteSelezionato}
             onChange={(e) => setClienteSelezionato(e.target.value)}
@@ -272,9 +297,12 @@ export default function ListiniPdf(): React.JSX.Element {
               <div>PEC: ortofrutticolalamapaolasrl@pec.it</div>
               <div>www.ortofrutticolalamapaola.it</div>
 
-              <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                Listino prezzi clienti
-              </div>
+              <div className="mt-3 text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">
+  Listino prezzi clienti
+</div>
+<div className="text-xs text-slate-500">
+  Offerta commerciale riservata
+</div>
               <div className="text-xs text-slate-500">
                 Data:{" "}
                 {new Date().toLocaleDateString("it-IT", {
@@ -307,9 +335,9 @@ export default function ListiniPdf(): React.JSX.Element {
             <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Dettagli offerta
             </div>
-            <div className="mt-2 text-sm text-slate-700">
-              <strong>Validità:</strong> {validita || "—"}
-            </div>
+            <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
+  Validità offerta: {validita || "—"}
+</div>
             <div className="mt-1 text-sm text-slate-700">
               <strong>Destinazione:</strong> {clienteAttivo?.piattaformaScarico || "—"}
             </div>
@@ -371,10 +399,29 @@ export default function ListiniPdf(): React.JSX.Element {
         <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">
           <strong>Note:</strong> {note || "—"}
         </div>
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700">
+    <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+      Contatto commerciale
+    </div>
+    <div className="mt-2 font-semibold text-slate-900">{firmaCommerciale || "—"}</div>
+    <div className="mt-1">{emailCommerciale || "—"}</div>
+    <div className="mt-1">{telefonoCommerciale || "—"}</div>
+  </div>
 
-        <div className="mt-8 text-xs leading-5 text-slate-500">
-          Documento ad uso commerciale. Prezzi soggetti a disponibilità merce e conferma ordine.
-        </div>
+  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-700">
+    <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+      Conferma ordine
+    </div>
+    <div className="mt-2">
+      Per conferme e disponibilità merce si richiede riscontro all'ufficio commerciale Lamapaola.
+    </div>
+  </div>
+</div>
+
+        <div className="mt-8 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
+  Documento ad uso commerciale riservato. Prezzi soggetti a disponibilità merce, conferma ordine e variazioni di mercato.
+</div>
       </div>
     </div>
   );
