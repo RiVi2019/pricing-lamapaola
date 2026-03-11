@@ -1,4 +1,5 @@
 "use client";
+import ReseLottoProductCalendar from "./ReseLottoProductCalendar";
 import ListiniPdf from "./ListiniPdf";
 import AnagraficheClienti from "./AnagraficheClienti";
 import React from "react";
@@ -81,7 +82,7 @@ export default function LamapaolaV15AppShell(): React.JSX.Element {
 
         <main className="min-w-0 flex-1 p-3 sm:p-4 xl:p-6">
           {section === "pricing" ? <PricingApp /> : null}
-          {section === "rese" ? <ReseLottoMasterDetail /> : null}
+          {section === "rese" ? <ReseLottoProductCalendar /> : null}
           {section === "listini" ? <ListiniPdf /> : null}
           {section === "anagrafiche" ? <AnagraficheClienti /> : null}
           {section === "statistiche" ? (

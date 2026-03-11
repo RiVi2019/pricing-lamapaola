@@ -45,15 +45,19 @@ interface LottoDayEntry {
   id: string;
   lottoId: string;
   data: string;
+
   pianteRaccolte: string;
+
   pesoMerceGrezza: string;
   pesoMerceLavorata: string;
   pesoVenduto: string;
+
   pedaneCosto: string;
   imballiCosto: string;
   giornateCosto: string;
   trasportoCosto: string;
   altriCosti: string;
+
   ricavo: string;
   note: string;
 }
@@ -105,15 +109,19 @@ const emptyEntry: LottoDayEntry = {
   id: "",
   lottoId: "",
   data: "",
+
   pianteRaccolte: "",
+
   pesoMerceGrezza: "",
   pesoMerceLavorata: "",
   pesoVenduto: "",
+
   pedaneCosto: "",
   imballiCosto: "",
   giornateCosto: "",
   trasportoCosto: "",
   altriCosti: "",
+
   ricavo: "",
   note: "",
 };
@@ -926,21 +934,21 @@ const handleEntryKeyDown = (
     </div>
 
     <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-        Piante raccolte
-      </label>
-      <input
-        type="number"
-        step="1"
-        min="0"
-        value={entryForm.pedaneCosto}
-        onChange={(e) => updateEntryForm("pedaneCosto", e.target.value)}
-        onKeyDown={(e) => handleEntryKeyDown(e, "pedaneCosto")}
-        className={`${inputClass} h-[46px]`}
-        disabled={selectedLotto.stato === "chiuso"}
-        placeholder="Valore"
-      />
-    </div>
+  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    Piante raccolte
+  </label>
+  <input
+    type="number"
+    step="1"
+    min="0"
+    value={entryForm.pianteRaccolte}
+    onChange={(e) => updateEntryForm("pianteRaccolte", e.target.value)}
+    onKeyDown={(e) => handleEntryKeyDown(e, "pianteRaccolte")}
+    className={`${inputClass} h-[46px]`}
+    disabled={selectedLotto.stato === "chiuso"}
+    placeholder="Numero piante"
+  />
+</div>
 
     <div>
       <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
