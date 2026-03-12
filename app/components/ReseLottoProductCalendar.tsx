@@ -39,9 +39,41 @@ interface LottoHeader {
   pesoMedioPiantaLavorata: string;
   noteGenerali: string;
 }
-
+interface LottoDayEntry {
+  id: string;
+  lottoId: string;
+  data: string;
+  pianteRaccolte: string;
+  pesoMerceGrezza: string;
+  pesoMerceLavorata: string;
+  pesoVenduto: string;
+  pedaneCosto: string;
+  imballiCosto: string;
+  giornateCosto: string;
+  trasportoCosto: string;
+  altriCosti: string;
+  ricavo: string;
+  note: string;
+}
 const STORAGE_KEY_LOTTI = "lamapaola-lotti-product-calendar-v1";
+const STORAGE_KEY_ENTRIES = "lamapaola-lotti-product-calendar-entries-v1";
 
+const emptyEntry: LottoDayEntry = {
+  id: "",
+  lottoId: "",
+  data: "",
+  pianteRaccolte: "",
+  pesoMerceGrezza: "",
+  pesoMerceLavorata: "",
+  pesoVenduto: "",
+  pedaneCosto: "",
+  imballiCosto: "",
+  giornateCosto: "",
+  trasportoCosto: "",
+  altriCosti: "",
+  ricavo: "",
+  note: "",
+};
 const PRODUCT_META: Record<
   ProductFamily,
   {
@@ -160,6 +192,43 @@ function calculateEstimate(lotto: LottoHeader) {
   const pesoGrezzoIniziale = toNumber(lotto.pesoGrezzoIniziale);
   const pesoMedioPiantaGrezza = toNumber(lotto.pesoMedioPiantaGrezza);
   const pesoMedioPiantaLavorata = toNumber(lotto.pesoMedioPiantaLavorata);
+  function summarizeEntries(entries: LottoDayEntry[]) {
+  const pianteRaccolte = entries.reduce((sum, item) => sum + toNumber(item.pianteRaccolte), 0);
+  const pesoGrezzo = entries.reduce((sum, item) => sum + toNumber(item.pesoMerceGrezza), 0);
+  const pesoLavorato = entries.reduce((sum, item) => sum + toNumber(item.pesoMerceLavorata), 0);
+  const pesoVenduto = entries.reduce((sum, item) => sum + toNumber(item.pesoVenduto), 0);
+
+  const pedaneCosto = entries.reduce((sum, item) => sum + toNumber(item.pedaneCosto), 0);
+  const imballiCosto = entries.reduce((sum, item) => sum + toNumber(item.imballiCosto), 0);
+  const giornateCosto = entries.reduce((sum, item) => sum + toNumber(item.giornateCosto), 0);
+  const trasportoCosto = entries.reduce((sum, item) => sum + toNumber(item.trasportoCosto), 0);
+  const altriCosti = entries.reduce((sum, item) => sum + toNumber(item.altriCosti), 0);
+
+  const totaleCosti =
+    pedaneCosto + imballiCosto + giornateCosto + trasportoCosto + altriCosti;
+
+  const totaleRicavi = entries.reduce((sum, item) => sum + toNumber(item.ricavo), 0);
+  const risultato = totaleRicavi - totaleCosti;
+
+  const resaPercentuale =
+    pesoGrezzo > 0 ? (pesoLavorato / pesoGrezzo) * 100 : 0;
+
+  return {
+    pianteRaccolte,
+    pesoGrezzo,
+    pesoLavorato,
+    pesoVenduto,
+    pedaneCosto,
+    imballiCosto,
+    giornateCosto,
+    trasportoCosto,
+    altriCosti,
+    totaleCosti,
+    totaleRicavi,
+    risultato,
+    resaPercentuale,
+  };
+}
 
   const pianteStimate =
     pianteIniziali > 0
@@ -189,7 +258,85 @@ function calculateEstimate(lotto: LottoHeader) {
     costoTeoricoKg,
   };
 }
+function summarizeEntries(entries: LottoDayEntry[]) {
+  const pianteRaccolte = entries.reduce(
+    (sum, item) => sum + toNumber(item.pianteRaccolte),
+    0
+  );
 
+  const pesoGrezzo = entries.reduce(
+    (sum, item) => sum + toNumber(item.pesoMerceGrezza),
+    0
+  );
+
+  const pesoLavorato = entries.reduce(
+    (sum, item) => sum + toNumber(item.pesoMerceLavorata),
+    0
+  );
+
+  const pesoVenduto = entries.reduce(
+    (sum, item) => sum + toNumber(item.pesoVenduto),
+    0
+  );
+
+  const pedaneCosto = entries.reduce(
+    (sum, item) => sum + toNumber(item.pedaneCosto),
+    0
+  );
+
+  const imballiCosto = entries.reduce(
+    (sum, item) => sum + toNumber(item.imballiCosto),
+    0
+  );
+
+  const giornateCosto = entries.reduce(
+    (sum, item) => sum + toNumber(item.giornateCosto),
+    0
+  );
+
+  const trasportoCosto = entries.reduce(
+    (sum, item) => sum + toNumber(item.trasportoCosto),
+    0
+  );
+
+  const altriCosti = entries.reduce(
+    (sum, item) => sum + toNumber(item.altriCosti),
+    0
+  );
+
+  const totaleCosti =
+    pedaneCosto +
+    imballiCosto +
+    giornateCosto +
+    trasportoCosto +
+    altriCosti;
+
+  const totaleRicavi = entries.reduce(
+    (sum, item) => sum + toNumber(item.ricavo),
+    0
+  );
+
+  const risultato = totaleRicavi - totaleCosti;
+
+  const resaPercentuale =
+    pesoGrezzo > 0 ? (pesoLavorato / pesoGrezzo) * 100 : 0;
+
+  return {
+    pianteRaccolte,
+    pesoGrezzo,
+    pesoLavorato,
+    pesoVenduto,
+    pedaneCosto,
+    imballiCosto,
+    giornateCosto,
+    trasportoCosto,
+    altriCosti,
+    totaleCosti,
+    totaleRicavi,
+    risultato,
+    resaPercentuale,
+  };
+}
 function monthTitle(date: Date): string {
   return date.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
 }
@@ -221,16 +368,32 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [lottoForm, setLottoForm] = React.useState<LottoHeader>(getEmptyLotto("FINOCCHIO"));
   const [notification, setNotification] = React.useState("");
+  const [selectedLottoId, setSelectedLottoId] = React.useState("");
+  const [entries, setEntries] = React.useState<LottoDayEntry[]>([]);
+  const [entryForm, setEntryForm] = React.useState<LottoDayEntry>({ ...emptyEntry });
 
   React.useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY_LOTTI);
-    if (!stored) return;
+  const stored = localStorage.getItem(STORAGE_KEY_LOTTI);
+  if (stored) {
     try {
       setLotti(JSON.parse(stored) as LottoHeader[]);
     } catch {
       setLotti([]);
     }
-  }, []);
+  }
+
+  const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+  if (storedEntries) {
+    try {
+      setEntries(JSON.parse(storedEntries) as LottoDayEntry[]);
+    } catch {
+      setEntries([]);
+    }
+  }
+}, []);
+React.useEffect(() => {
+  localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+}, [entries]);
 
   React.useEffect(() => {
     localStorage.setItem(STORAGE_KEY_LOTTI, JSON.stringify(lotti));
@@ -245,7 +408,42 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
   const updateLottoForm = <K extends keyof LottoHeader>(key: K, value: LottoHeader[K]) => {
     setLottoForm((prev) => ({ ...prev, [key]: value }));
   };
+const updateEntryForm = <K extends keyof LottoDayEntry>(
+  key: K,
+  value: LottoDayEntry[K]
+) => {
+  setEntryForm((prev) => ({ ...prev, [key]: value }));
+};
 
+const resetEntryForm = () => {
+  setEntryForm({
+    ...emptyEntry,
+    lottoId: selectedLottoId,
+    data: new Date().toISOString().slice(0, 10),
+  });
+};
+
+const saveEntry = (): void => {
+  if (!selectedLottoId) {
+    setNotification("Seleziona prima un lotto");
+    return;
+  }
+
+  if (!entryForm.data) {
+    setNotification("Inserisci la data");
+    return;
+  }
+
+  const newEntry: LottoDayEntry = {
+    ...entryForm,
+    id: makeId(),
+    lottoId: selectedLottoId,
+  };
+
+  setEntries((prev) => [newEntry, ...prev]);
+  resetEntryForm();
+  setNotification("Registrazione giornaliera salvata");
+};
   const openNewLottoModal = (date: string) => {
     setLottoForm(getEmptyLotto(selectedProduct, date));
     setIsModalOpen(true);
@@ -273,7 +471,27 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
     () => lotti.filter((item) => item.prodotto === selectedProduct),
     [lotti, selectedProduct]
   );
+  const selectedLotto = React.useMemo(
+  () => productLotti.find((item) => item.id === selectedLottoId) ?? null,
+  [productLotti, selectedLottoId]
+);
+const selectedEntries = React.useMemo(
+  () => entries.filter((item) => item.lottoId === selectedLottoId),
+  [entries, selectedLottoId]
+);
+const selectedSummary = React.useMemo(
+  () => summarizeEntries(selectedEntries),
+  [selectedEntries]
+);
+React.useEffect(() => {
+  if (!selectedLottoId) return;
 
+  setEntryForm({
+    ...emptyEntry,
+    lottoId: selectedLottoId,
+    data: new Date().toISOString().slice(0, 10),
+  });
+}, [selectedLottoId]);
   const calendarDays = React.useMemo(() => buildCalendarDays(currentMonth), [currentMonth]);
   const lottoEstimate = React.useMemo(() => calculateEstimate(lottoForm), [lottoForm]);
 
@@ -438,7 +656,56 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
             </div>
           </div>
         </div>
+        {selectedLotto ? (
+  <div className="rounded-[32px] border border-sky-100 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+    <div className="mb-5 text-lg font-semibold text-slate-900">
+      Dettaglio lotto selezionato
+    </div>
 
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <MiniStat
+        title="Costo lotto"
+        value={euro(toNumber(selectedLotto.costoLotto))}
+      />
+
+      <MiniStat
+        title="Piante iniziali"
+        value={toNumber(selectedLotto.pianteIniziali).toLocaleString("it-IT")}
+      />
+
+      <MiniStat
+        title="Peso grezzo iniziale"
+        value={formatKg(toNumber(selectedLotto.pesoGrezzoIniziale))}
+      />
+
+      <MiniStat
+        title="Produttore"
+        value={selectedLotto.produttore || "—"}
+      />
+    </div>
+  </div>
+) : null}
+{(() => {
+  const resultClass =
+    selectedSummary.risultato > 0
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : selectedSummary.risultato < 0
+        ? "border-rose-200 bg-rose-50 text-rose-800"
+        : "border-amber-200 bg-amber-50 text-amber-800";
+
+  const resultText =
+    selectedSummary.risultato > 0
+      ? "Il lotto è attualmente in utile."
+      : selectedSummary.risultato < 0
+        ? "Il lotto è attualmente in perdita."
+        : "Il lotto è attualmente in pareggio.";
+
+  return (
+    <div className={`mt-6 rounded-2xl border px-4 py-4 text-sm font-semibold shadow-sm ${resultClass}`}>
+      {resultText}
+    </div>
+  );
+})()}
         <div className="rounded-[32px] border border-sky-100 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
           <div className="mb-5 flex items-center gap-2 text-lg font-semibold text-slate-900">
             <ClipboardList size={18} /> Lotti in raccolta · {selectedProduct}
@@ -456,10 +723,16 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
                 .map((lotto) => {
                   const estimate = calculateEstimate(lotto);
                   return (
-                    <div
-                      key={lotto.id}
-                      className="rounded-3xl border border-sky-100 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] p-5 shadow-sm"
-                    >
+                    <button
+  key={lotto.id}
+  type="button"
+  onClick={() => setSelectedLottoId(lotto.id)}
+  className={`w-full rounded-3xl border p-5 text-left shadow-sm ${
+    selectedLottoId === lotto.id
+      ? "border-emerald-200 bg-emerald-50/60"
+      : "border-sky-100 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)]"
+  }`}
+>
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                           <div className="text-lg font-semibold text-slate-900">
@@ -481,14 +754,42 @@ export default function ReseLottoProductCalendar(): React.JSX.Element {
                           {lotto.stato === "aperto" ? "Lotto aperto" : "Lotto chiuso"}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })
             )}
           </div>
         </div>
-      </div>
+      </div> 
+{selectedLotto ? (
+  <div className="rounded-[32px] border border-sky-100 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+    <div className="mb-5 text-lg font-semibold text-slate-900">
+      Dettaglio lotto selezionato
+    </div>
 
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <MiniStat
+        title="Costo lotto"
+        value={euro(toNumber(selectedLotto.costoLotto))}
+      />
+
+      <MiniStat
+        title="Piante iniziali"
+        value={toNumber(selectedLotto.pianteIniziali).toLocaleString("it-IT")}
+      />
+
+      <MiniStat
+        title="Peso grezzo iniziale"
+        value={formatKg(toNumber(selectedLotto.pesoGrezzoIniziale))}
+      />
+
+      <MiniStat
+        title="Produttore"
+        value={selectedLotto.produttore || "—"}
+      />
+    </div>
+  </div>
+) : null}
       {isModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
           <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[32px] border border-sky-100 bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.25)]">
